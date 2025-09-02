@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamagotchi Boyfriend 🎮</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: #2c3e50;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 8px solid #34495e;
+        }
+        
+        .screen {
+            background: #1a252f;
+            padding: 20px;
+            min-height: 500px;
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+        
+        .date-time {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .tamagotchi-container {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .boyfriend-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 10px;
+            border: 3px solid #fff;
+            transition: all 0.3s ease;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        /* Face states - using local images */
+        .face-healthy {
+            background-image: url('images/happy.jpg');
+        }
+        
+        .face-sick {
+            background-image: url('images/sick.jpg');
+        }
+        
+        .face-critical {
+            background-image: url('images/critical.jpg');
+        }
+        
+        .face-dead {
+            background-image: url('images/dead.jpg');
+            filter: grayscale(100%);
+        }
+        
+        .status-message {
+            color: white;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .health-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #27ae60);
+            border-radius: 5px;
+            transition: all 0.5s ease;
+            width: 100%;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat {
+            background: #34495e;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+        }
+        
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3498db;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #bdc3c7;
+            margin-top: 5px;
+        }
+        
+        .pill-section {
+            background: #e74c3c;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            animation: pulse-red 2s infinite;
+        }
+        
+        .pill-section.taken {
+            background: #27ae60;
+            animation: none;
+        }
+        
+        .pill-icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+        
+        .pill-text {
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .feed-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            width: 100%;
+        }
+        
+        .feed-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .feed-btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .control-btn {
+            background: #34495e;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            flex: 1;
+            font-size: 12px;
+        }
+        
+        @keyframes pulse-red {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .happy { animation: bounce 1s ease; }
+        .sick { 
+            filter: grayscale(50%);
+            transform: rotate(-5deg);
+        }
+        .dead {
+            filter: grayscale(100%);
+            transform: rotate(90deg);
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .container {
+                max-width: 95vw;
+                margin: 5px;
+            }
+            
+            .screen {
+                padding: 15px;
+                min-height: 450px;
+            }
+            
+            .header {
+                font-size: 16px;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .boyfriend-avatar {
+                width: 70px;
+                height: 70px;
+                font-size: 35px;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="screen">
+            <div class="header">Bonsoirrr ma wifey 👑</div>
+            <div class="date-time" id="current-datetime"></div>
+            
+            <div class="tamagotchi-container">
+                <div class="boyfriend-avatar" id="avatar">🤵</div>
+                <div class="status-message" id="status-message">J'ai besoin que tu prennes ta pilule pour survivre!</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="health-fill"></div>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number" id="lives">3</span>
+                    <span class="stat-label">Vies restantes</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="streak">0</span>
+                    <span class="stat-label">Jours consécutifs</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="days-together">730</span>
+                    <span class="stat-label">Jours ensemble</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="total-pills">0</span>
+                    <span class="stat-label">Pilules totales</span>
+                </div>
+            </div>
+            
+            <div class="pill-section" id="pill-section">
+                <div class="pill-icon">💊</div>
+                <div class="pill-text" id="pill-text">Nourris-moi avec ta pilule!</div>
+                <button class="feed-btn" id="feed-btn" onclick="takePill()">
+                    🍽️ Prendre la pilule
+                </button>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" onclick="showStats()">📊 Stats</button>
+                <button class="control-btn" onclick="petBoyfriend()">🤗 Câlin</button>
+                <button class="control-btn" onclick="resetGame()">🔄 Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            lives: 3,
+            streak: 0,
+            health: 100,
+            lastPillDate: null,
+            totalPills: 0,
+            isDead: false,
+            takenToday: false
+        };
+
+        // Load saved game state
+        function loadGame() {
+            const saved = localStorage.getItem('tamagotchiBoyfriend');
+            if (saved) {
+                const parsedState = JSON.parse(saved);
+                gameState = { ...gameState, ...parsedState };
+                
+                // Check if we missed days
+                const today = new Date().toDateString();
+                const lastPill = gameState.lastPillDate;
+                
+                if (lastPill && lastPill !== today) {
+                    const lastDate = new Date(lastPill);
+                    const currentDate = new Date();
+                    const daysDiff = Math.floor((currentDate - lastDate) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysDiff >= 1) {
+                        // Missed days - lose health and possibly lives
+                        gameState.health = Math.max(0, gameState.health - (daysDiff * 30));
+                        gameState.streak = 0;
+                        gameState.takenToday = false;
+                        
+                        if (gameState.health <= 0 && gameState.lives > 0) {
+                            gameState.lives--;
+                            gameState.health = gameState.lives > 0 ? 50 : 0;
+                        }
+                        
+                        if (gameState.lives <= 0) {
+                            gameState.isDead = true;
+                            gameState.health = 0;
+                        }
+                    }
+                }
+                
+                // Reset daily pill status
+                if (gameState.lastPillDate !== today) {
+                    gameState.takenToday = false;
+                }
+            }
+            updateDisplay();
+        }
+
+        // Save game state
+        function saveGame() {
+            localStorage.setItem('tamagotchiBoyfriend', JSON.stringify(gameState));
+        }
+
+        // Messages based on game state
+        const messages = {
+            healthy: [
+                "Je me sens super bien grâce à toi! 😊",
+                "Ta pilule me donne de l'énergie! ⚡",
+                "On forme une bonne équipe! 👫",
+                "Merci de prendre soin de moi! 💝"
+            ],
+            sick: [
+                "Je ne me sens pas très bien... 😷",
+                "J'ai besoin de ta pilule pour aller mieux! 🤒",
+                "Ma santé décline sans tes soins... 💔",
+                "S'il te plaît, n'oublie pas ta pilule! 🙏"
+            ],
+            dead: [
+                "Je suis mort... Tu m'as oublié 💀",
+                "Game Over! Recommence avec 'Reset' ⚰️",
+                "J'ai besoin d'un reset pour revivre! 👻"
+            ],
+            taken: [
+                "Merci mon amour! Je me sens mieux! 😍",
+                "Parfait! Ma santé remonte! 💚",
+                "Tu es la meilleure wifey ever! 🥰",
+                "Mission accomplie pour aujourd'hui! ✅"
+            ]
+        };
+
+        function getRandomMessage(category) {
+            const msgs = messages[category];
+            return msgs[Math.floor(Math.random() * msgs.length)];
+        }
+
+        function updateDisplay() {
+            const avatar = document.getElementById('avatar');
+            const status = document.getElementById('status-message');
+            const healthFill = document.getElementById('health-fill');
+            const pillSection = document.getElementById('pill-section');
+            const feedBtn = document.getElementById('feed-btn');
+            const pillText = document.getElementById('pill-text');
+
+            // Update stats
+            document.getElementById('lives').textContent = gameState.lives;
+            document.getElementById('streak').textContent = gameState.streak;
+            document.getElementById('total-pills').textContent = gameState.totalPills;
+            
+            // Update health bar
+            healthFill.style.width = gameState.health + '%';
+            
+            // Update avatar and status based on game state
+            avatar.className = 'boyfriend-avatar';
+            
+            if (gameState.isDead) {
+                avatar.classList.add('face-dead', 'dead');
+                avatar.textContent = ''; // Remove emoji to show photo
+                status.textContent = getRandomMessage('dead');
+                feedBtn.disabled = true;
+                feedBtn.textContent = '☠️ Mort';
+                pillSection.classList.remove('taken');
+            } else if (gameState.takenToday) {
+                avatar.classList.add('face-healthy', 'happy');
+                avatar.textContent = ''; // Remove emoji to show photo
+                status.textContent = getRandomMessage('taken');
+                feedBtn.disabled = true;
+                feedBtn.textContent = '✅ Pris aujourd\'hui';
+                pillSection.classList.add('taken');
+                pillText.textContent = 'Pilule prise! Reviens demain!';
+            } else if (gameState.health < 30) {
+                avatar.classList.add('face-critical', 'sick');
+                avatar.textContent = ''; // Remove emoji to show photo
+                status.textContent = getRandomMessage('sick');
+                feedBtn.disabled = false;
+                feedBtn.textContent = '💊 URGENT: Prendre la pilule!';
+                pillText.textContent = 'ATTENTION: Ma santé est critique!';
+            } else if (gameState.health < 70) {
+                avatar.classList.add('face-sick');
+                avatar.textContent = ''; // Remove emoji to show photo
+                status.textContent = getRandomMessage('sick');
+                feedBtn.disabled = false;
+                feedBtn.textContent = '💊 Prendre la pilule';
+                pillText.textContent = 'J\'ai besoin de ta pilule!';
+            } else {
+                avatar.classList.add('face-healthy');
+                avatar.textContent = ''; // Remove emoji to show photo
+                status.textContent = getRandomMessage('healthy');
+                feedBtn.disabled = false;
+                feedBtn.textContent = '💊 Prendre la pilule';
+                pillText.textContent = 'Nourris-moi avec ta pilule!';
+            }
+        }
+
+        function takePill() {
+            if (gameState.isDead || gameState.takenToday) return;
+            
+            const today = new Date().toDateString();
+            
+            // Check if continuing streak
+            if (gameState.lastPillDate) {
+                const lastDate = new Date(gameState.lastPillDate);
+                const currentDate = new Date();
+                const daysDiff = Math.floor((currentDate - lastDate) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff === 1) {
+                    gameState.streak++;
+                } else if (daysDiff > 1) {
+                    gameState.streak = 1;
+                }
+            } else {
+                gameState.streak = 1;
+            }
+            
+            // Restore health and possibly lives
+            gameState.health = Math.min(100, gameState.health + 40);
+            gameState.totalPills++;
+            gameState.takenToday = true;
+            gameState.lastPillDate = today;
+            
+            // Restore life if on a good streak and had lost lives
+            if (gameState.streak >= 3 && gameState.lives < 3) {
+                gameState.lives++;
+                gameState.streak = 0; // Reset streak after life restoration
+            }
+            
+            // Revive if dead and taking pill
+            if (gameState.isDead && gameState.lives > 0) {
+                gameState.isDead = false;
+                gameState.health = 60;
+            }
+            
+            saveGame();
+            updateDisplay();
+            
+            // Celebration animation
+            const avatar = document.getElementById('avatar');
+            avatar.style.animation = 'bounce 1s ease';
+            setTimeout(() => {
+                avatar.style.animation = '';
+            }, 1000);
+        }
+
+        function petBoyfriend() {
+            if (gameState.isDead) return;
+            
+            const status = document.getElementById('status-message');
+            const oldText = status.textContent;
+            status.textContent = "Aww merci pour le câlin! 🥰";
+            
+            const avatar = document.getElementById('avatar');
+            avatar.style.transform = 'scale(1.1)';
+            
+            setTimeout(() => {
+                status.textContent = oldText;
+                avatar.style.transform = '';
+            }, 2000);
+        }
+
+        function showStats() {
+            const status = document.getElementById('status-message');
+            const oldText = status.textContent;
+            status.textContent = `Santé: ${gameState.health}% | Série: ${gameState.streak} jours | Pilules: ${gameState.totalPills}`;
+            
+            setTimeout(() => {
+                status.textContent = oldText;
+            }, 3000);
+        }
+
+        function resetGame() {
+            if (confirm('Es-tu sûre de vouloir recommencer? Toutes les données seront perdues!')) {
+                gameState = {
+                    lives: 3,
+                    streak: 0,
+                    health: 100,
+                    lastPillDate: null,
+                    totalPills: 0,
+                    isDead: false,
+                    takenToday: false
+                };
+                saveGame();
+                updateDisplay();
+            }
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            // Convert to Paris time
+            const parisTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Paris"}));
+            const options = { 
+                weekday: 'long', 
+                day: 'numeric',
+                month: 'long',
+                hour: '2-digit', 
+                minute: '2-digit',
+                timeZone: 'Europe/Paris'
+            };
+            document.getElementById('current-datetime').textContent = 
+                parisTime.toLocaleDateString('fr-FR', options);
+        }
+
+        function updateDaysTogther() {
+            // Anniversary date: September 4th, 2023
+            const anniversaryDate = new Date('2023-09-04');
+            const today = new Date();
+            const daysTogether = Math.floor((today - anniversaryDate) / (1000 * 60 * 60 * 24));
+            document.getElementById('days-together').textContent = daysTogether;
+        }
+
+        // Initialize the game
+        function init() {
+            updateDateTime();
+            updateDaysTogther();
+            loadGame();
+            
+            // Update time every minute
+            setInterval(updateDateTime, 60000);
+            
+            // Check daily at midnight for missed pills
+            setInterval(() => {
+                const now = new Date();
+                if (now.getHours() === 0 && now.getMinutes() === 0) {
+                    loadGame(); // This will check for missed days
+                }
+            }, 60000);
+        }
+
+        // Start the game
+        init();
+    </script>
+</body>
+</html>
